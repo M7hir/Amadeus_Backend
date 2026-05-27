@@ -60,6 +60,8 @@ func NewClient(baseURL string) *Client {
 }
 
 func (c *Client) TrackRecommendation(q url.Values) ([]byte, error) {
+	// logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
+	// logger.PrintInfo("query:", map[string]interface{}{"query": q})
 	if err := validateRecommendationQuery(q); err != nil {
 		return nil, err
 	}
@@ -207,27 +209,6 @@ func validateRecommendationValue(key string, q url.Values, spec queryParameterQu
 	}
 }
 
-func parseCSVQuery(q url.Values, key string) []string {
-	values := q[key]
-	if len(values) == 0 {
-		return nil
-	}
-
-	result := make([]string, 0, len(values))
-	for _, value := range values {
-		parts := strings.Split(value, ",")
-		for _, part := range parts {
-			trimmed := strings.TrimSpace(part)
-			if trimmed == "" {
-				continue
-			}
-			result = append(result, trimmed)
-		}
-	}
-
-	return result
-}
-
 func validateIntRange(raw string, min int, max int, field string) error {
 	if raw == "" {
 		return nil
@@ -276,4 +257,25 @@ func validateListItems(q url.Values, minItems int, maxItems int, field string) e
 		}
 	}
 	return nil
+}
+
+func parseCSVQuery(q url.Values, key string) []string {
+	values := q[key]
+	if len(values) == 0 {
+		return nil
+	}
+
+	result := make([]string, 0, len(values))
+	for _, value := range values {
+		parts := strings.Split(value, ",")
+		for _, part := range parts {
+			trimmed := strings.TrimSpace(part)
+			if trimmed == "" {
+				continue
+			}
+			result = append(result, trimmed)
+		}
+	}
+
+	return result
 }

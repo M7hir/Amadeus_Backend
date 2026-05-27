@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -102,8 +103,9 @@ func (app *application) trackUpstreamErrorResponse(w http.ResponseWriter, r *htt
 }
 
 func (app *application) writeTrackResponse(w http.ResponseWriter, status int, body []byte) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	_, err := w.Write(body)
-	return err
+	var payload envelope
+	if err := json.Unmarshal(body, &payload); err != nil {
+		return err
+	}
+	return app.writeJSON(w, status, payload, nil)
 }

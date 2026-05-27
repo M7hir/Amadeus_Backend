@@ -1,54 +1,109 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"io"
+	"errors"
 	"net/http"
+
+	"amadeus.m7hir.net/internal/reccobeats"
 )
 
-func (app *application) trackHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) trackDetailHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readStringIDParam(r)
 	if err != nil {
 		app.notFoundResponse(w, r)
 		return
 	}
 
-	url := app.mergePath(fmt.Sprintf("/v1/track/%s", id))
-	client := &http.Client{}
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	body, err := app.reccobeats.TrackDetail(id)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		app.trackUpstreamErrorResponse(w, r, err)
 		return
 	}
-	req.Header.Add("Accept", "application/json")
 
-	res, err := client.Do(req)
+	if err := app.writeTrackResponse(w, http.StatusOK, body); err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) trackRecommendationHandler(w http.ResponseWriter, r *http.Request) {
+	body, err := app.reccobeats.TrackRecommendation(r.URL.Query())
 	if err != nil {
+		app.trackUpstreamErrorResponse(w, r, err)
+		return
+	}
+
+	if err := app.writeTrackResponse(w, http.StatusOK, body); err != nil {
 		app.serverErrorResponse(w, r, err)
-		return
 	}
-	defer res.Body.Close()
+}
 
-	if res.StatusCode != http.StatusOK {
-		app.errorResponse(w, r, res.StatusCode, http.StatusText(res.StatusCode))
-		return
-	}
-
-	body, err := io.ReadAll(res.Body)
+func (app *application) trackAlbumHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readStringIDParam(r)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		app.notFoundResponse(w, r)
 		return
 	}
 
-	var payload envelope
-	if err := json.Unmarshal(body, &payload); err != nil {
-		app.serverErrorResponse(w, r, err)
+	body, err := app.reccobeats.TrackAlbum(id)
+	if err != nil {
+		app.trackUpstreamErrorResponse(w, r, err)
 		return
 	}
 
-	if err := app.writeJSON(w, http.StatusOK, envelope{"track": payload}, nil); err != nil {
+	if err := app.writeTrackResponse(w, http.StatusOK, body); err != nil {
 		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) trackMultipleHandler(w http.ResponseWriter, r *http.Request) {
+	body, err := app.reccobeats.TrackMultiple(r.URL.Query())
+	if err != nil {
+		app.trackUpstreamErrorResponse(w, r, err)
 		return
 	}
+
+	if err := app.writeTrackResponse(w, http.StatusOK, body); err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) trackAudioFeaturesHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readStringIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	body, err := app.reccobeats.TrackAudioFeatures(id)
+	if err != nil {
+		app.trackUpstreamErrorResponse(w, r, err)
+		return
+	}
+
+	if err := app.writeTrackResponse(w, http.StatusOK, body); err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) trackUpstreamErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
+	var validationErr *reccobeats.ValidationError
+	if errors.As(err, &validationErr) {
+		app.badRequestResponse(w, r, errors.New(validationErr.Message))
+		return
+	}
+
+	var responseErr *reccobeats.ResponseError
+	if errors.As(err, &responseErr) {
+		app.errorResponse(w, r, responseErr.StatusCode, responseErr.Message)
+		return
+	}
+
+	app.serverErrorResponse(w, r, err)
+}
+
+func (app *application) writeTrackResponse(w http.ResponseWriter, status int, body []byte) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_, err := w.Write(body)
+	return err
 }

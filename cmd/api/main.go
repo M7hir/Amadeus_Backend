@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"amadeus.m7hir.net/internal/jsonlog"
+	"amadeus.m7hir.net/internal/reccobeats"
 )
 
 const version = "1.0.0"
@@ -20,8 +21,9 @@ type config struct {
 }
 
 type application struct {
-	config config
-	logger *jsonlog.Logger
+	config     config
+	logger     *jsonlog.Logger
+	reccobeats *reccobeats.Client
 }
 
 func main() {
@@ -34,8 +36,9 @@ func main() {
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 
 	app := &application{
-		config: cfg,
-		logger: logger,
+		config:     cfg,
+		logger:     logger,
+		reccobeats: reccobeats.NewClient(baseUrl),
 	}
 
 	srv := &http.Server{
@@ -46,10 +49,10 @@ func main() {
 		WriteTimeout: 30 * time.Second,
 	}
 
-	app.logger.PrintInfo("starting server", map[string]string{"env": cfg.env, "addr": srv.Addr})
+	app.logger.PrintInfo("starting server", map[string]interface{}{"env": cfg.env, "addr": srv.Addr})
 
 	if err := srv.ListenAndServe(); err != nil {
-		app.logger.PrintFatal(err, map[string]string{"addr": srv.Addr})
+		app.logger.PrintFatal(err, map[string]interface{}{"addr": srv.Addr})
 	}
 
 }

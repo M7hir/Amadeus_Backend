@@ -1,0 +1,41 @@
+{
+      "id": "1655770942",
+      "readable": true,
+      "title": "Love Me",
+      "title_short": "Love Me",
+      "title_version": "",
+      "isrc": "USSM12201528",
+      "link": "https://www.deezer.com/track/1655770942",
+      "duration": "207",
+      "rank": "483519",
+      "explicit_lyrics": false,
+      "explicit_content_lyrics": 0,
+      "explicit_content_cover": 2,
+      "preview": "https://cdnt-preview.dzcdn.net/api/1/1/0/9/e/0/09e920144f557c00e4743eb3b9335d29.mp3?hdnea=exp=1780429189~acl=/api/1/1/0/9/e/0/09e920144f557c00e4743eb3b9335d29.mp3*~data=user_id=0,application_id=42~hmac=60a48c5b40db66339b0f4ded8c38452f9336d83d729960883bfe8302278fd120",
+      "md5_image": "f850620d7dd58fccb394538aa2205605",
+      "artist": {
+        "id": "114497622",
+        "name": "RealestK",
+        "link": "https://www.deezer.com/artist/114497622",
+        "picture": "https://api.deezer.com/artist/114497622/image",
+        "picture_small": "https://cdn-images.dzcdn.net/images/artist/29d8c53284fe61ca39c4df123d887fab/56x56-000000-80-0-0.jpg",
+        "picture_medium": "https://cdn-images.dzcdn.net/images/artist/29d8c53284fe61ca39c4df123d887fab/250x250-000000-80-0-0.jpg",
+        "picture_big": "https://cdn-images.dzcdn.net/images/artist/29d8c53284fe61ca39c4df123d887fab/500x500-000000-80-0-0.jpg",
+        "picture_xl": "https://cdn-images.dzcdn.net/images/artist/29d8c53284fe61ca39c4df123d887fab/1000x1000-000000-80-0-0.jpg",
+        "tracklist": "https://api.deezer.com/artist/114497622/top?limit=50",
+        "type": "artist"
+      },
+      "album": {
+        "id": "295643262",
+        "title": "Love Me",
+        "cover": "https://api.deezer.com/album/295643262/image",
+        "cover_small": "https://cdn-images.dzcdn.net/images/cover/f850620d7dd58fccb394538aa2205605/56x56-000000-80-0-0.jpg",
+        "cover_medium": "https://cdn-images.dzcdn.net/images/cover/f850620d7dd58fccb394538aa2205605/250x250-000000-80-0-0.jpg",
+        "cover_big": "https://cdn-images.dzcdn.net/images/cover/f850620d7dd58fccb394538aa2205605/500x500-000000-80-0-0.jpg",
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/f850620d7dd58fccb394538aa2205605/1000x1000-000000-80-0-0.jpg",
+        "md5_image": "f850620d7dd58fccb394538aa2205605",
+        "tracklist": "https://api.deezer.com/album/295643262/tracks",
+        "type": "album"
+      },
+      "type": "track"
+    }

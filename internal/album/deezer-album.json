@@ -1,0 +1,29 @@
+  {
+      "id": "295643262",
+      "title": "Love Me",
+      "link": "https://www.deezer.com/album/295643262",
+      "cover": "https://api.deezer.com/album/295643262/image",
+      "cover_small": "https://cdn-images.dzcdn.net/images/cover/f850620d7dd58fccb394538aa2205605/56x56-000000-80-0-0.jpg",
+      "cover_medium": "https://cdn-images.dzcdn.net/images/cover/f850620d7dd58fccb394538aa2205605/250x250-000000-80-0-0.jpg",
+      "cover_big": "https://cdn-images.dzcdn.net/images/cover/f850620d7dd58fccb394538aa2205605/500x500-000000-80-0-0.jpg",
+      "cover_xl": "https://cdn-images.dzcdn.net/images/cover/f850620d7dd58fccb394538aa2205605/1000x1000-000000-80-0-0.jpg",
+      "md5_image": "f850620d7dd58fccb394538aa2205605",
+      "genre_id": 165,
+      "nb_tracks": 1,
+      "record_type": "single",
+      "tracklist": "https://api.deezer.com/album/295643262/tracks",
+      "explicit_lyrics": false,
+      "artist": {
+        "id": "114497622",
+        "name": "RealestK",
+        "link": "https://www.deezer.com/artist/114497622",
+        "picture": "https://api.deezer.com/artist/114497622/image",
+        "picture_small": "https://cdn-images.dzcdn.net/images/artist/29d8c53284fe61ca39c4df123d887fab/56x56-000000-80-0-0.jpg",
+        "picture_medium": "https://cdn-images.dzcdn.net/images/artist/29d8c53284fe61ca39c4df123d887fab/250x250-000000-80-0-0.jpg",
+        "picture_big": "https://cdn-images.dzcdn.net/images/artist/29d8c53284fe61ca39c4df123d887fab/500x500-000000-80-0-0.jpg",
+        "picture_xl": "https://cdn-images.dzcdn.net/images/artist/29d8c53284fe61ca39c4df123d887fab/1000x1000-000000-80-0-0.jpg",
+        "tracklist": "https://api.deezer.com/artist/114497622/top?limit=50",
+        "type": "artist"
+      },
+      "type": "album"
+    }

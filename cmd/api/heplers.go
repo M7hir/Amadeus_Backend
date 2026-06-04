@@ -64,7 +64,7 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst int
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 
-	err := dec.Decode(&dst)
+	err := dec.Decode(dst)
 	if err != nil {
 		var syntaxError *json.SyntaxError
 		var unmarshalTypeError *json.UnmarshalTypeError
@@ -110,11 +110,11 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst int
 }
 
 func (app *application) mergePath(endpoint string) string {
-	fullURL, err := url.JoinPath(baseUrl, endpoint)
+	fullURL, err := url.JoinPath(reccobeatsBaseUrl, endpoint)
 
 	if err != nil {
 		log.Fatal(err)
-		return baseUrl
+		return reccobeatsBaseUrl
 	}
 
 	return fullURL

@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"time"
 
+	"amadeus.m7hir.net/internal/data"
+	"amadeus.m7hir.net/internal/deezer"
 	"amadeus.m7hir.net/internal/jsonlog"
 	"amadeus.m7hir.net/internal/reccobeats"
 
@@ -19,7 +21,8 @@ import (
 
 const version = "1.0.0"
 
-const baseUrl = "https://api.reccobeats.com"
+const reccobeatsBaseUrl = "https://api.reccobeats.com"
+const deezerBaseUrl = "https://api.deezer.com"
 
 type config struct {
 	port int
@@ -33,6 +36,8 @@ type application struct {
 	config     config
 	logger     *jsonlog.Logger
 	reccobeats *reccobeats.Client
+	deezer     *deezer.Client
+	models     data.Models
 }
 
 func main() {
@@ -69,7 +74,9 @@ func main() {
 	app := &application{
 		config:     cfg,
 		logger:     logger,
-		reccobeats: reccobeats.NewClient(baseUrl),
+		reccobeats: reccobeats.NewClient(reccobeatsBaseUrl),
+		deezer:     deezer.NewClient(deezerBaseUrl),
+		models:     data.NewModels(db),
 	}
 
 	srv := &http.Server{

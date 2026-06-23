@@ -19,6 +19,7 @@ func (app *application) routes() *httprouter.Router {
 	router.HandlerFunc(http.MethodPost, "/v1/song", app.addSongHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/artist", app.addArtistHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/album", app.addAlbumHandler)
+	router.HandlerFunc(http.MethodPost, "/v1/signup", app.userSignUpHandler)
 
 	return router
 }

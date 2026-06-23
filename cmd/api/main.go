@@ -76,7 +76,7 @@ func main() {
 		logger:     logger,
 		reccobeats: reccobeats.NewClient(reccobeatsBaseUrl),
 		deezer:     deezer.NewClient(deezerBaseUrl),
-		models:     data.NewModels(db),
+		models:     data.NewModels(db,logger),
 	}
 
 	srv := &http.Server{

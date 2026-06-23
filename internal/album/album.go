@@ -5,10 +5,13 @@ import (
 	"errors"
 	"strings"
 	"time"
+
+	"amadeus.m7hir.net/internal/jsonlog"
 )
 
 type AlbumModel struct {
-	DB *sql.DB
+	DB     *sql.DB
+	Logger *jsonlog.Logger
 }
 
 type DeezerAlbum struct {
@@ -87,8 +90,8 @@ func ValidateAlbum(album *Album) error {
 	if strings.TrimSpace(album.name) == "" {
 		return errors.New("album title is required")
 	}
-	if album.genre_id <= 0 {
-		return errors.New("album genre id cannot be zero or less")
+	if album.genre_id < 0 {
+		return errors.New("album genre id cannot be less than zero ")
 	}
 	return nil
 }

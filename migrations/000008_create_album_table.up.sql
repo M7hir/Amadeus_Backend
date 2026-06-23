@@ -12,7 +12,7 @@ CREATE TABLE album (
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT album_name_check CHECK (length(name) > 0),
-    CONSTRAINT album_genre_id_check CHECK (genre_id > 0)
+    CONSTRAINT album_genre_id_check CHECK (genre_id >= 0)
 );
 
 

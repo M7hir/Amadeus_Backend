@@ -5,10 +5,13 @@ import (
 	"errors"
 	"strings"
 	"time"
+
+	"amadeus.m7hir.net/internal/jsonlog"
 )
 
 type ArtistModel struct {
-	DB *sql.DB
+	DB     *sql.DB
+	Logger *jsonlog.Logger
 }
 
 type Artist struct {

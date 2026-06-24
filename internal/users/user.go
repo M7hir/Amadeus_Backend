@@ -10,6 +10,7 @@ import (
 
 	"amadeus.m7hir.net/internal/jsonlog"
 	"amadeus.m7hir.net/internal/validator"
+	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -19,9 +20,9 @@ type UserModel struct {
 }
 
 var (
-	ErrDuplicateEmail = errors.New("Duplicate Email")
+	ErrDuplicateEmail = errors.New("duplicate email")
 	ErrEditConflict   = errors.New("edit conflict")
-	ErrRecordNotFound = errors.New("Record Not Found")
+	ErrRecordNotFound = errors.New("record not found")
 )
 
 var AnonymousUser = &User{}
@@ -141,13 +142,22 @@ func (m UserModel) InsertUser(user *User) error {
 	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&user.Id, &user.CreatedAt, &user.Version)
 	if err != nil {
 		switch {
-		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
+		case isDuplicateEmailError(err):
 			return ErrDuplicateEmail
 		default:
 			return err
 		}
 	}
 	return nil
+}
+
+func isDuplicateEmailError(err error) bool {
+	var pqErr *pq.Error
+	if errors.As(err, &pqErr) {
+		return pqErr.Code == "23505"
+	}
+
+	return false
 }
 
 func (m UserModel) GetUser(email string) (*User, error) {
@@ -201,7 +211,7 @@ func (m UserModel) UpdateUser(user *User) error {
 	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&user.Version)
 	if err != nil {
 		switch {
-		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
+		case isDuplicateEmailError(err):
 			return ErrDuplicateEmail
 		case errors.Is(err, sql.ErrNoRows):
 			return ErrEditConflict

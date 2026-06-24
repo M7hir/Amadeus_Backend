@@ -37,7 +37,8 @@ func (app *application) userSignUpHandler(w http.ResponseWriter, r *http.Request
 
 	v := validator.New()
 
-	if users.ValidateUser(v, newUser); !v.Valid() {
+	users.ValidateUser(v, newUser)
+	if len(v.Errors) != 0 {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
@@ -48,13 +49,16 @@ func (app *application) userSignUpHandler(w http.ResponseWriter, r *http.Request
 		case errors.Is(err, users.ErrDuplicateEmail):
 			v.AddError("email", "a user with this email already exists")
 			app.failedValidationResponse(w, r, v.Errors)
+			return
 		default:
 			app.serverErrorResponse(w, r, err)
+			return
 		}
 	}
-	// err = user.PasswordHash.Ser
-	err = app.writeJSON(w, http.StatusAccepted, envelope{"user": newUser}, nil)
+
+	err = app.writeJSON(w, http.StatusCreated, envelope{"user": newUser}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
+		return
 	}
 }

@@ -55,8 +55,14 @@ func (app *application) userSignUpHandler(w http.ResponseWriter, r *http.Request
 			return
 		}
 	}
+	app.background(func() {
+		err = app.mailer.Send(newUser.Email, "user_welcome.tmpl", newUser)
+		if err != nil {
+			app.logger.PrintError(err, nil)
+		}
+	})
 
-	err = app.writeJSON(w, http.StatusCreated, envelope{"user": newUser}, nil)
+	err = app.writeJSON(w, http.StatusAccepted, envelope{"user": newUser}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return

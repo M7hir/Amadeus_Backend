@@ -4,8 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"flag"
-	"fmt"
-	"net/http"
 	"os"
 	"strconv"
 	"sync"
@@ -115,18 +113,9 @@ func main() {
 			cfg.smtp.password, cfg.smtp.sender),
 	}
 
-	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", cfg.port),
-		Handler:      app.routes(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
-	}
-
-	logger.PrintInfo("starting server", map[string]interface{}{"env": cfg.env, "version": version, "port": cfg.port})
-
-	if err := srv.ListenAndServe(); err != nil {
-		logger.PrintFatal(err, map[string]interface{}{"env": cfg.env})
+	err = app.server()
+	if err != nil {
+		logger.PrintFatal(err, nil)
 	}
 
 }

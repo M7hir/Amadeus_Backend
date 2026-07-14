@@ -12,6 +12,7 @@ import (
 
 var (
 	ErrRecordNotFound = user.ErrRecordNotFound
+	ErrEditConflict   = user.ErrEditConflict
 )
 
 type Models struct {
@@ -19,6 +20,7 @@ type Models struct {
 	Artist artist.ArtistModel
 	Album  album.AlbumModel
 	User   user.UserModel
+	Token  TokenModel
 }
 
 func NewModels(db *sql.DB, logger *jsonlog.Logger) Models {
@@ -27,5 +29,6 @@ func NewModels(db *sql.DB, logger *jsonlog.Logger) Models {
 		Artist: artist.ArtistModel{DB: db, Logger: logger},
 		Album:  album.AlbumModel{DB: db, Logger: logger},
 		User:   user.UserModel{DB: db, Logger: logger},
+		Token:  TokenModel{DB: db},
 	}
 }

@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"database/sql/driver"
 	"errors"
@@ -58,8 +59,8 @@ func (p *Password) Set(plaintextPassword string) error {
 	return nil
 }
 
-func (p *Password) Matches(plaintextPassword string, hash []byte) (bool, error) {
-	err := bcrypt.CompareHashAndPassword(hash, []byte(plaintextPassword))
+func (p *Password) Matches(plaintextPassword string) (bool, error) {
+	err := bcrypt.CompareHashAndPassword(p.hash, []byte(plaintextPassword))
 	if err != nil {
 		switch {
 		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
@@ -201,7 +202,7 @@ func (m UserModel) UpdateUser(user *User) error {
 	SET first_name=$1,last_name = $2,email = $3,password_hash = $4,activated = $5,
 	version = version + 1
 	WHERE id = $6 AND version = $7
-	RETRUNING version`
+	RETURNING version`
 
 	args := []interface{}{user.FirstName, user.LastName, user.Email, user.PasswordHash, user.Activated, user.Id, user.Version}
 
@@ -220,4 +221,47 @@ func (m UserModel) UpdateUser(user *User) error {
 		}
 	}
 	return nil
+}
+
+func (m UserModel) GetForToken(tokenScope, tokenPlaintext string) (*User, error) {
+	tokenHash := sha256.Sum256([]byte(tokenPlaintext))
+
+	query := `
+		SELECT users.id, users.created_at, users.first_name,users.last_name, users.email,
+users.password_hash, users.activated, users.version
+FROM users
+INNER JOIN tokens
+ON users.id = tokens.user_id
+WHERE tokens.hash = $1
+AND tokens.scope = $2
+AND tokens.expiry > $3`
+
+	args := []interface{}{tokenHash[:], tokenScope, time.Now()}
+
+	var user User
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(
+		&user.Id,
+		&user.CreatedAt,
+		&user.FirstName,
+		&user.LastName,
+		&user.Email,
+		&user.PasswordHash.hash,
+		&user.Activated,
+		&user.Version,
+	)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &user, nil
 }

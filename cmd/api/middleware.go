@@ -11,7 +11,7 @@ import (
 
 	"amadeus.m7hir.net/internal/data"
 	user "amadeus.m7hir.net/internal/users"
-	"amadeus.m7hir.net/internal/validator"
+	"github.com/pascaldekloe/jwt"
 	"golang.org/x/time/rate"
 )
 
@@ -104,14 +104,31 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 
 		token := headerParts[1]
 
-		v := validator.New()
-
-		if data.ValidateTokenPlaintext(v, token); !v.Valid() {
+		claims, err := jwt.HMACCheck([]byte(token), []byte(app.config.jwt.secret))
+		if err != nil {
 			app.invalidAuthenticationTokenResponse(w, r)
 			return
 		}
 
-		user, err := app.models.User.GetForToken(data.ScopeAuthentication, token)
+		if !claims.Valid(time.Now()) {
+			app.invalidAuthenticationTokenResponse(w, r)
+			return
+		}
+
+		if claims.Issuer != "amadeus.m7hir.net" {
+			app.invalidAuthenticationTokenResponse(w, r)
+			return
+		}
+
+		if !claims.AcceptAudience("amadeus.m7hir.net") {
+			app.invalidAuthenticationTokenResponse(w, r)
+			return
+		}
+
+		userId := claims.Subject
+
+		user, err := app.models.User.GetUserById(userId)
+
 		if err != nil {
 			switch {
 			case errors.Is(err, data.ErrRecordNotFound):

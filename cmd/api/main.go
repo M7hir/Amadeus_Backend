@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"flag"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -49,6 +50,9 @@ type config struct {
 
 	cors struct {
 		trustedOrigins []string
+	}
+	jwt struct {
+		secret string
 	}
 }
 
@@ -104,7 +108,17 @@ func main() {
 		return nil
 	})
 
+	flag.StringVar(&cfg.jwt.secret, "jwt-secret", "", "JWT secret")
+	displayVersion := flag.Bool("version", false, "Display version and exit")
+
 	flag.Parse()
+
+	if *displayVersion {
+		fmt.Printf("Version:\t%s\n", version)
+		// Print out the contents of the buildTime variable.
+		// fmt.Printf("Build time:\t%s\n", buildTime)
+		os.Exit(0)
+	}
 
 	db, err := OpenDB(cfg)
 	if err != nil {

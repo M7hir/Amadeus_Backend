@@ -197,6 +197,42 @@ func (m UserModel) GetUser(email string) (*User, error) {
 
 }
 
+func (m UserModel) GetUserById(userId string) (*User, error) {
+	query := `SELECT id, created_at, updated_at, first_name, last_name, email, password_hash, activated, version
+    FROM users
+    WHERE id = $1`
+
+	var user User
+	args := []interface{}{userId}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(
+		&user.Id,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.FirstName,
+		&user.LastName,
+		&user.Email,
+		&user.PasswordHash.hash,
+		&user.Activated,
+		&user.Version,
+	)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &user, nil
+
+}
+
 func (m UserModel) UpdateUser(user *User) error {
 	query := `UPDATE users 
 	SET first_name=$1,last_name = $2,email = $3,password_hash = $4,activated = $5,

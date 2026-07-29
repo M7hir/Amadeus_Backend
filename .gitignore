@@ -10,3 +10,4 @@ vendor/
 *.exe
 *.out
 *.log
+*.json

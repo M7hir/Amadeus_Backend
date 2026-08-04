@@ -1,9 +1,12 @@
 package deezer
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/url"
+
+	ytDLP "amadeus.m7hir.net/internal/yt-dlp"
 )
 
 type Track struct {
@@ -76,10 +79,10 @@ func (e *ResponseError) Error() string {
 func (c *Client) DeezerSearch(q url.Values) ([]byte, error) {
 	// logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 	// logger.PrintInfo("query:", map[string]interface{}{"query": q})
-	return c.DeezerGet(q.Encode())
+	return c.DeezerGetSearch(q.Encode())
 }
 
-func (c *Client) DeezerGet(rawQuery string) ([]byte, error) {
+func (c *Client) DeezerGetSearch(rawQuery string) ([]byte, error) {
 	deezerURL := "https://api.deezer.com/search/track"
 
 	if rawQuery != "" {
@@ -111,4 +114,86 @@ func (c *Client) DeezerGet(rawQuery string) ([]byte, error) {
 	}
 
 	return body, nil
+}
+
+func (c *Client) DeezerGetTrack(q url.Values) ([]byte, error) {
+	// logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
+	// logger.PrintInfo("query:", map[string]interface{}{"query": q})
+	return c.DeezerGetSearch(q.Encode())
+}
+
+func (c *Client) DeezerGetTrackHandler(id string) ([]byte, error) {
+	deezerURL := c.BaseURL + "/track"
+	// logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
+	// logger.PrintInfo("deezerURL:", map[string]interface{}{"query": deezerURL})
+	fullURL, err := url.JoinPath(deezerURL, id)
+	if err != nil {
+		return nil, err
+	}
+	// logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
+	// logger.PrintInfo("fullURL:", map[string]interface{}{"query": fullURL})
+	httpClient := c.HTTPClient
+	if httpClient == nil {
+		httpClient = http.DefaultClient
+	}
+
+	req, err := http.NewRequest(http.MethodGet, fullURL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return nil, &ResponseError{StatusCode: res.StatusCode, Message: http.StatusText(res.StatusCode)}
+	}
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	var payload map[string]interface{}
+	if err := json.Unmarshal(body, &payload); err != nil {
+		return nil, err
+	}
+
+	title, _ := payload["title"].(string)
+
+	// var artistName string
+	// if artistObj, ok := payload["artist"].(map[string]interface{}); ok {
+	// 	artistName, _ = artistObj["name"].(string)
+	// } else if artistStr, ok := payload["artist"].(string); ok {
+	// 	// Fallback just in case your specific endpoint returns a flat string
+	// 	artistName = artistStr
+	// }
+
+	artist := payload["artist"].(map[string]interface{})["name"].(string)
+
+	cleanTitle, err := ytDLP.SanitizeStreamQuery(title)
+	if err != nil {
+		return nil, err
+	}
+
+	cleanArtist, err := ytDLP.SanitizeStreamQuery(artist)
+	if err != nil {
+		return nil, err
+	}
+
+	url, _, err := ytDLP.ResolveStream(cleanTitle, cleanArtist)
+	if err != nil {
+		return nil, err
+	}
+
+	payload["ytdlp-link"] = url
+
+	modifiedBody, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	return modifiedBody, nil
 }

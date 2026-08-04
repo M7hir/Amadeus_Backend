@@ -200,3 +200,22 @@ func (app *application) addAlbumHandler(w http.ResponseWriter, r *http.Request) 
 		app.serverErrorResponse(w, r, err)
 	}
 }
+
+func (app *application) DeezerTrackHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readStringIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	body, err := app.deezer.DeezerGetTrackHandler(id)
+	if err != nil {
+		app.trackUpstreamErrorResponse(w, r, err)
+		return
+	}
+
+	if err := app.writeTrackResponse(w, http.StatusOK, body); err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
+}

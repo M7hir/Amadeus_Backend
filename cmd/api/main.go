@@ -19,9 +19,10 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	ytdlp "github.com/lrstanley/go-ytdlp"
 )
 
-const version = "1.0.0"
+const version = "1.0.0"	
 
 const reccobeatsBaseUrl = "https://api.reccobeats.com"
 const deezerBaseUrl = "https://api.deezer.com"
@@ -119,6 +120,8 @@ func main() {
 		// fmt.Printf("Build time:\t%s\n", buildTime)
 		os.Exit(0)
 	}
+
+	ytdlp.MustInstall(context.TODO(), nil)
 
 	db, err := OpenDB(cfg)
 	if err != nil {
